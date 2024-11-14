@@ -28,6 +28,11 @@ class CastleVania_ChessPlayer(ChessPlayer):
         """
         #if we have plenty of time (more than 30 seconds), we can afford to search deeper (depth=2),
         #which may lead to better strategic decisions. Otherwise, we limit depth to 1 to avoid timing out.
+
+        opponent_color = 'black'
+        if (self.color == 'black'):
+            opponent_color = 'white'
+        
         depth = 2 if your_remaining_time > 30 else 1
         
         best_move = None
@@ -40,6 +45,13 @@ class CastleVania_ChessPlayer(ChessPlayer):
             #deep copy of the board to simulate this move without altering the original board state.
             new_board = deepcopy(self.board)
             new_board.make_move(*move)
+
+            # Check if this move puts the opponent's king in checkmate or check
+            if new_board.is_king_in_checkmate(opponent_color):
+                return move  # Return immediately if we find a checkmate move
+            elif new_board.is_king_in_check(opponent_color):
+                return move  # Return immediately if we find a check move
+
 
             #use Minimax to evaluate the board after making this move.
             #we pass `False` because after our move, it's the opponent's turn (minimizing).
