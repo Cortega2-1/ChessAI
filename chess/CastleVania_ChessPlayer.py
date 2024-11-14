@@ -29,10 +29,6 @@ class CastleVania_ChessPlayer(ChessPlayer):
         #if we have plenty of time (more than 30 seconds), we can afford to search deeper (depth=2),
         #which may lead to better strategic decisions. Otherwise, we limit depth to 1 to avoid timing out.
 
-        opponent_color = 'black'
-        if (self.color == 'black'):
-            opponent_color = 'white'
-        
         depth = 2 if your_remaining_time > 30 else 1
         
         best_move = None
@@ -45,13 +41,6 @@ class CastleVania_ChessPlayer(ChessPlayer):
             #deep copy of the board to simulate this move without altering the original board state.
             new_board = deepcopy(self.board)
             new_board.make_move(*move)
-
-            # Check if this move puts the opponent's king in checkmate or check
-            if new_board.is_king_in_checkmate(opponent_color):
-                return move  # Return immediately if we find a checkmate move
-            elif new_board.is_king_in_check(opponent_color):
-                return move  # Return immediately if we find a check move
-
 
             #use Minimax to evaluate the board after making this move.
             #we pass `False` because after our move, it's the opponent's turn (minimizing).
@@ -132,6 +121,10 @@ class CastleVania_ChessPlayer(ChessPlayer):
         """
         score = 0
 
+        opponent_color = 'black'
+        if (self.color == 'black'):
+            opponent_color = 'white'
+
         #loop through all pieces on the board to calculate the total score.
         for location, piece in board.items():
             #get the value of the piece using our predefined scoring system.
@@ -146,5 +139,11 @@ class CastleVania_ChessPlayer(ChessPlayer):
         #apply a penalty if our king is in check, to prioritize moves that protect the king.
         if board.is_king_in_check(self.color):
             score -= 5
+        # Check if the opponent's king is in check or checkmate.
+        if board.is_king_in_check(opponent_color):
+            score += 10  # A bonus for putting the opponent's king in check.
 
+        if board.is_king_in_checkmate(opponent_color):
+            score += 50  # A large bonus for checkmate (winning).
+        
         return score
